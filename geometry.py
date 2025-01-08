@@ -10,31 +10,31 @@ def equal(a, b):
     return abs(a - b) < EPS
 
 
-class Vector:
+class Point:
     def __init__(self, x, y) -> None:
         self.x = x
         self.y = y
 
-    def __add__(self, other: "Vector") -> "Vector":
-        return Vector(self.x + other.x, self.y + other.y)
+    def __add__(self, other: "Point") -> "Point":
+        return Point(self.x + other.x, self.y + other.y)
 
-    def __sub__(self, other: "Vector") -> "Vector":
-        return Vector(self.x - other.x, self.y - other.y)
+    def __sub__(self, other: "Point") -> "Point":
+        return Point(self.x - other.x, self.y - other.y)
 
-    def __mul__(self, other) -> "Vector":
-        return Vector(self.x * other, self.y * other)
+    def __mul__(self, other) -> "Point":
+        return Point(self.x * other, self.y * other)
 
-    def __truediv__(self, other) -> "Vector":
+    def __truediv__(self, other) -> "Point":
         assert other != 0, "division by zero"
-        return Vector(self.x / other, self.y / other)
+        return Point(self.x / other, self.y / other)
 
     def __abs__(self) -> float:
         return (self.x**2 + self.y**2) ** 0.5
 
-    def __eq__(self, other: "Vector") -> bool:
+    def __eq__(self, other: "Point") -> bool:
         return equal(self.x, other.x) and equal(self.y, other.y)
 
-    def __ne__(self, other: "Vector") -> bool:
+    def __ne__(self, other: "Point") -> bool:
         return not (self == other)
 
     def __str__(self) -> str:
@@ -43,29 +43,29 @@ class Vector:
     def format(self) -> str:
         return f"({self.x:.{DIGITS}f}, {self.y:.{DIGITS}f})"
 
-    def dot(self, other: "Vector") -> float:
+    def dot(self, other: "Point") -> float:
         """内積
 
         Args:
-            other (Vector): 演算対象
+            other (Point): 演算対象
 
         Returns:
             float: 計算結果
         """
         return self.x * other.x + self.y * other.y
 
-    def cross(self, other: "Vector") -> float:
+    def cross(self, other: "Point") -> float:
         """外積
 
         Args:
-            other (Vector): 演算対象のベクトル
+            other (Point): 演算対象
 
         Returns:
             float: 計算結果
         """
         return self.x * other.y - self.y * other.x
 
-    def move(self, dx, dy) -> "Vector":
+    def move(self, dx, dy) -> "Point":
         """平行移動
 
         Args:
@@ -73,36 +73,36 @@ class Vector:
             dy (float): y軸方向の移動量
 
         Returns:
-            Vector: 移動後の座標
+            Point: 移動後の座標
         """
-        return Vector(self.x + dx, self.y + dy)
+        return Point(self.x + dx, self.y + dy)
 
-    def rotate(self, theta, origin: "Vector" = None) -> "Vector":
+    def rotate(self, theta, origin: "Point" = None) -> "Point":
         """回転移動
 
         Args:
             theta (float): 回転する角度（ラジアン）
-            origin (Vector, optional): 原点. Defaults to (0, 0).
+            origin (Point, optional): 原点. Defaults to (0, 0).
 
         Returns:
-            Vector: 移動後の座標
+            Point: 移動後の座標
         """
         if origin is None:
-            origin = Vector(0, 0)
+            origin = Point(0, 0)
         relative = self - origin
-        return origin + Vector(
+        return origin + Point(
             relative.x * cos(theta) - relative.y * sin(theta),
             relative.x * sin(theta) + relative.y * cos(theta),
         )
 
-    def copy(self) -> "Vector":
-        return Vector(self.x, self.y)
+    def copy(self) -> "Point":
+        return Point(self.x, self.y)
 
-    def ccw(self, other: "Vector") -> int:
+    def ccw(self, other: "Point") -> int:
         """回転方向を判定
 
         Args:
-            other (Vector): もう片方のベクトル
+            other (Point): もう片方の点
 
         Returns:
             int: (self から見て other が) 1: 反時計回り, -1: 時計回り, 0: 直線上
@@ -114,19 +114,19 @@ class Vector:
         else:
             return 1
 
-    def unit_vector(self) -> "Vector":
+    def unit_vector(self) -> "Point":
         """単位ベクトルを取得
 
         Returns:
-            Vector: 同じ方向の単位ベクトル
+            Point: 同じ方向の単位ベクトル
         """
         if equal(abs(self), 0):
-            return Vector(0, 0)
+            return Point(0, 0)
         return self / abs(self)
 
 
 class Line:
-    def __init__(self, p1: Vector, p2: Vector) -> None:
+    def __init__(self, p1: Point, p2: Point) -> None:
         assert p1 != p2, "p1 and p2 must be different"
         self.p1 = p1.copy()
         self.p2 = p2.copy()
@@ -148,26 +148,26 @@ class Line:
         else:
             return (self.p2.y - self.p1.y) / (self.p2.x - self.p1.x)
 
-    def projection(self, p: Vector) -> Vector:
+    def projection(self, p: Point) -> Point:
         """射影
 
         Args:
-            p (Vector): もとの座標
+            p (Point): もとの座標
 
         Returns:
-            Vector: 移動後の座標
+            Point: 移動後の座標
         """
         base = self.p2 - self.p1
         return self.p1 + base * (p - self.p1).dot(base) / abs(base) ** 2
 
-    def reflection(self, p: Vector) -> Vector:
+    def reflection(self, p: Point) -> Point:
         """反射
 
         Args:
-            p (Vector): もとの座標
+            p (Point): もとの座標
 
         Returns:
-            Vector: 反射後の座標
+            Point: 反射後の座標
         """
         return p + (self.projection(p) - p) * 2
 
@@ -193,11 +193,11 @@ class Line:
         """
         return equal((self.p2 - self.p1).dot(other.p2 - other.p1), 0)
 
-    def is_including_point(self, p: Vector) -> bool:
+    def is_including_point(self, p: Point) -> bool:
         """直線上に点 p が存在するかどうか
 
         Args:
-            p (Vector): 判定対象の点
+            p (Point): 判定対象の点
 
         Returns:
             bool: True: 直線上に存在, False: 直線上に存在しない
@@ -233,14 +233,14 @@ class Line:
         ccw2 = (self.p2 - self.p1).ccw(other.p2 - self.p1)
         return ccw1 * ccw2 < 0
 
-    def crossing_point(self, other: Union["Line", "Segment"]) -> Union[Vector, None]:
+    def crossing_point(self, other: Union["Line", "Segment"]) -> Union[Point, None]:
         """他の直線との交点
 
         Args:
             other (Line | Segment): 対象の直線または線分
 
         Returns:
-            Vector | None: 交点の座標. 交差しない場合は None. 平行な場合も None
+            Point | None: 交点の座標. 交差しない場合は None. 平行な場合も None
         """
         if self.is_parallel(other) or not self.is_crossing(other):
             return None
@@ -250,11 +250,11 @@ class Line:
             return other.p1
         return other.p1 + (other.p2 - other.p1) * (d2 / d1)
 
-    def distance_to_point(self, p: Vector) -> float:
+    def distance_to_point(self, p: Point) -> float:
         """直線と点の距離
 
         Args:
-            p (Vector): 対象の点
+            p (Point): 対象の点
 
         Returns:
             float: 距離
@@ -264,7 +264,7 @@ class Line:
 
 
 class Segment(Line):
-    def __init__(self, p1: Vector, p2: Vector) -> None:
+    def __init__(self, p1: Point, p2: Point) -> None:
         super().__init__(p1, p2)
 
     def __abs__(self) -> float:
@@ -281,11 +281,11 @@ class Segment(Line):
         p2 = self.p2.rotate(pi / 2, center)
         return Line(p1, p2)
 
-    def is_including_point(self, p: Vector) -> bool:
+    def is_including_point(self, p: Point) -> bool:
         """線分上に点 p が存在するかどうか
 
         Args:
-            p (Vector): 判定対象の点
+            p (Point): 判定対象の点
 
         Returns:
             bool: True: 線分上に存在, False: 線分上に存在しない
@@ -327,11 +327,11 @@ class Segment(Line):
         ccw4 = (other.p2 - other.p1).ccw(self.p2 - other.p1)
         return ccw1 != ccw2 and ccw3 != ccw4
 
-    def distance_to_point(self, p: Vector) -> float:
+    def distance_to_point(self, p: Point) -> float:
         """線分と点の距離
 
         Args:
-            p (Vector): 対象の点
+            p (Point): 対象の点
 
         Returns:
             float: 距離
@@ -361,11 +361,11 @@ class Segment(Line):
 
 
 class Polygon:
-    def __init__(self, points: list[Vector]) -> None:
+    def __init__(self, points: list[Point]) -> None:
         """自己交差を含まない多角形
 
         Args:
-            points (list[Vector]): 頂点を反時計回りに追加したリスト
+            points (list[Point]): 頂点を反時計回りに追加したリスト
         """
         self.points = [p.copy() for p in points]
         self.n = len(self.points)
@@ -405,11 +405,11 @@ class Polygon:
             bottom = min(bottom, (b - a).ccw(c - b))
         return not (top == 1 and bottom == -1)
 
-    def side_of_point(self, p: Vector) -> int:
+    def side_of_point(self, p: Point) -> int:
         """多角形と点の位置関係を判定. O(self.n)
 
         Args:
-            p (Vector): 判定対象の点
+            p (Point): 判定対象の点
 
         Returns:
             int: 1: 内部, 0: 線上, -1: 外部
@@ -589,7 +589,7 @@ class Polygon:
 
 
 class Circle:
-    def __init__(self, center: Vector, radius: float) -> None:
+    def __init__(self, center: Point, radius: float) -> None:
         assert radius > 0, "radius must be positive"
         self.center = center.copy()
         self.radius = radius
@@ -608,11 +608,11 @@ class Circle:
         """
         return pi * self.radius**2
 
-    def side_of_point(self, p: Vector) -> int:
+    def side_of_point(self, p: Point) -> int:
         """円と点の位置関係を判定.
 
         Args:
-            p (Vector): 判定対象の点
+            p (Point): 判定対象の点
 
         Returns:
             int: 1: 内部, 0: 線上, -1: 外部
@@ -656,14 +656,14 @@ class Circle:
         else:
             return 0
 
-    def crossing_points_with_circle(self, other: "Circle") -> list[Vector]:
+    def crossing_points_with_circle(self, other: "Circle") -> list[Point]:
         """円と円の交点
 
         Args:
             other (Circle): 対象の円
 
         Returns:
-            list[Vector]: 0~2個の交点を含むリスト
+            list[Point]: 0~2個の交点を含むリスト
         """
         if self.side_of_touching_circle(other) == 1:
             unit = (other.center - self.center).unit_vector()
@@ -708,14 +708,14 @@ class Circle:
             return True
         return other.distance_to_point(self.center) < self.radius
 
-    def crossing_points_with_line(self, other: Line) -> list[Vector]:
+    def crossing_points_with_line(self, other: Line) -> list[Point]:
         """直線と円の交点
 
         Args:
             other (Segment): 対象の直線
 
         Returns:
-            list[Vector]: 0~2個の交点を含むリスト
+            list[Point]: 0~2個の交点を含むリスト
         """
         if not self.is_touching_line(other) and not self.is_crossing_line(other):
             return []
@@ -773,14 +773,14 @@ class Circle:
             tri2 = (p2 - other.center).cross(p1 - other.center) / 2
             return arc1 + arc2 + tri1 + tri2
 
-    def touching_points_with_tangent(self, other: Vector) -> list[Vector]:
+    def touching_points_with_tangent(self, other: Point) -> list[Point]:
         """other を通る接線の接点
 
         Args:
-            other (Vector): 対象の点
+            other (Point): 対象の点
 
         Returns:
-            list[Vector]: 接点のリスト
+            list[Point]: 接点のリスト
         """
         if self.side_of_point(other) == 1:
             return []
@@ -804,7 +804,7 @@ class PillowManager:
             axis (bool, optional): x=0, y=0 を強調するかどうか. Defaults to True.
             grid (int, optional): 補助線の間隔. None なら表示なし. Defaults to None.
         """
-        
+
         # コメントアウトのみで提出可能にするため，pillow は初期化時に import
         from PIL import Image, ImageDraw
 
@@ -819,35 +819,35 @@ class PillowManager:
         axis and self._add_axis()
         (grid is not None) and self._add_grid(grid)
 
-    def _check_point(self, p: Vector) -> None:
+    def _check_point(self, p: Point) -> None:
         assert self.bottom <= p.x <= self.top, f"{p.x=} is out of range"
         assert self.bottom <= p.y <= self.top, f"{p.y=} is out of range"
 
-    def _convert(self, p: Vector) -> Vector:
+    def _convert(self, p: Point) -> Point:
         magn = self.SIZE / (self.top - self.bottom)
         x = (p.x - self.bottom) * magn + self.OFFSET
         y = (p.y - self.bottom) * magn + self.OFFSET
-        return Vector(x, y)
+        return Point(x, y)
 
     def _add_axis(self) -> None:
-        axis_x = Segment(Vector(self.bottom, 0), Vector(self.top, 0))
-        axis_y = Segment(Vector(0, self.bottom), Vector(0, self.top))
+        axis_x = Segment(Point(self.bottom, 0), Point(self.top, 0))
+        axis_y = Segment(Point(0, self.bottom), Point(0, self.top))
         self.draw_segment(axis_x, width=3, color=(200, 200, 200))
         self.draw_segment(axis_y, width=3, color=(200, 200, 200))
 
     def _add_grid(self, grid: int) -> None:
         for i in range(0, self.top + 1, grid):
-            parallel_x = Segment(Vector(i, self.bottom), Vector(i, self.top))
-            parallel_y = Segment(Vector(self.bottom, i), Vector(self.top, i))
+            parallel_x = Segment(Point(i, self.bottom), Point(i, self.top))
+            parallel_y = Segment(Point(self.bottom, i), Point(self.top, i))
             self.draw_segment(parallel_x, color=(200, 200, 200))
             self.draw_segment(parallel_y, color=(200, 200, 200))
         for i in range(0, self.bottom - 1, -grid):
-            parallel_x = Segment(Vector(i, self.bottom), Vector(i, self.top))
-            parallel_y = Segment(Vector(self.bottom, i), Vector(self.top, i))
+            parallel_x = Segment(Point(i, self.bottom), Point(i, self.top))
+            parallel_y = Segment(Point(self.bottom, i), Point(self.top, i))
             self.draw_segment(parallel_x, color=(200, 200, 200))
             self.draw_segment(parallel_y, color=(200, 200, 200))
 
-    def draw_point(self, p: Vector, size=None, color=(0, 0, 0)) -> None:
+    def draw_point(self, p: Point, size=None, color=(0, 0, 0)) -> None:
         if size is None:
             size = self.SIZE / 150
         center = self._convert(p)
@@ -857,10 +857,10 @@ class PillowManager:
         )
 
     def draw_line(self, line: Line, width=1, color=(0, 0, 0)) -> None:
-        lb = Vector(self.bottom, self.bottom)
-        lt = Vector(self.bottom, self.top)
-        rb = Vector(self.top, self.bottom)
-        rt = Vector(self.top, self.top)
+        lb = Point(self.bottom, self.bottom)
+        lt = Point(self.bottom, self.top)
+        rb = Point(self.top, self.bottom)
+        rt = Point(self.top, self.top)
         if -1 < line.slope() < 1:
             p1 = Line(lb, lt).crossing_point(line)
             p2 = Line(rt, rb).crossing_point(line)
@@ -881,8 +881,8 @@ class PillowManager:
             self.draw_segment(Segment(p1, p2), width, color)
 
     def draw_circle(self, circle: Circle, color=(0, 0, 0)) -> None:
-        lb = self._convert(circle.center - Vector(circle.radius, circle.radius))
-        rt = self._convert(circle.center + Vector(circle.radius, circle.radius))
+        lb = self._convert(circle.center - Point(circle.radius, circle.radius))
+        rt = self._convert(circle.center + Point(circle.radius, circle.radius))
         self.draw.ellipse(
             (lb.x, lb.y, rt.x, rt.y),
             outline=color,
