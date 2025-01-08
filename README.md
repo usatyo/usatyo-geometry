@@ -2,7 +2,7 @@
 サンプルテストケース付き Python 幾何ライブラリ
 
 ### 依存関係
-`pillowManager` を使用する場合は
+`pillowManager` を使用する場合は以下を実行
 ```
 pip3 install pillow
 ```
