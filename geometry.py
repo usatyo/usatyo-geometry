@@ -304,9 +304,9 @@ class Segment(Line):
             bool: True: 交差, False: 交差しない
         """
         if type(other) == Line:
-            return super()._is_crossing_line(other)
+            return self._is_crossing_line(other)
         if type(other) == Segment:
-            return super()._is_crossing_segment(other)
+            return self._is_crossing_segment(other)
         raise ValueError("invalid type")
 
     def _is_crossing_line(self, other: "Line") -> bool:
@@ -367,7 +367,10 @@ class Polygon:
         Args:
             points (list[Point]): 頂点を反時計回りに追加したリスト
         """
-        self.points = [p.copy() for p in points]
+        self.points = [points[0].copy()]
+        for p in points[1:]:
+            if self.points[-1] != p:
+                self.points.append(p.copy())
         self.n = len(self.points)
 
     def __str__(self) -> str:
