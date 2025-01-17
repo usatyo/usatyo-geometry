@@ -371,6 +371,8 @@ class Polygon:
         for p in points[1:]:
             if self.points[-1] != p:
                 self.points.append(p.copy())
+        while self.points[-1] == self.points[0]:
+            self.points.pop()
         self.n = len(self.points)
 
     def __str__(self) -> str:
@@ -422,6 +424,10 @@ class Polygon:
         for i in range(self.n):
             a = self.points[i]
             b = self.points[(i + 1) % self.n]
+            if a == b == p:
+                return 0
+            if a == b:
+                continue
             if Segment(a, b).is_including_point(p):
                 return 0
             theta += atan2((a - p).cross(b - p), (a - p).dot(b - p))
@@ -666,7 +672,7 @@ class Circle:
             other (Circle): 対象の円
 
         Returns:
-            list[Point]: 0~2個の交点を含むリスト
+            list[Point]: 0~2個の交点を反時計まわりに含むリスト
         """
         if self.side_of_touching_circle(other) == 1:
             unit = (other.center - self.center).unit_vector()
@@ -683,7 +689,7 @@ class Circle:
             h = (self.radius**2 - cosine**2) ** 0.5
             unit = (other.center - self.center).unit_vector()
             p = self.center + unit * cosine
-            return [p + unit.rotate(pi / 2) * h, p - unit.rotate(pi / 2) * h]
+            return [p - unit.rotate(pi / 2) * h, p + unit.rotate(pi / 2) * h]
         else:
             return []
 
